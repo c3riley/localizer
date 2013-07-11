@@ -66,6 +66,22 @@ public class GeneratorMojo extends AbstractMojo {
      * @parameter
      */
     protected String fileMask;
+    
+    /**
+     * Additional file name mask like "Messages.properties" to further
+     * restrict the resource processing.
+     *
+     * @parameter
+     */
+    protected String[] fileMasks;
+    
+    /**
+     * Additional file name mask like "Messages.properties" to further
+     * restrict the resource processing.
+     *
+     * @parameter
+     */
+    protected String[] pathMasks;
 
     /**
      * The charset encoding of generated Java sources.
@@ -76,6 +92,7 @@ public class GeneratorMojo extends AbstractMojo {
     protected String outputEncoding;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+    	Boolean generated = false;
         String pkg = project.getPackaging();
         if(pkg!=null && pkg.equals("pom"))
             return; // skip POM modules
@@ -98,15 +115,46 @@ public class GeneratorMojo extends AbstractMojo {
             for( String name : (List<String>)res.getExcludes() )
                 fs.createExclude().setName(name);
 
+            
             for( String relPath : fs.getDirectoryScanner(new Project()).getIncludedFiles() ) {
                 File f = new File(baseDir,relPath);
                 if(!f.getName().endsWith(".properties") || f.getName().contains("_"))
                     continue;
-                if(fileMask!=null && !f.getName().equals(fileMask))
+                
+                if(pathMasks!=null){
+                	boolean found = false;
+                	try{
+	                	for(String pm : pathMasks){
+	                		if(pm!=null && f.getCanonicalPath().matches(pm)){
+	                			found=true;
+	                			break;
+	                		}
+	                	}
+                	}catch(IOException e){
+                		throw new MojoExecutionException("Failed to generate a class from "+f,e);
+                	}
+                	if(!found)
+                		continue;
+                	
+                }else if(fileMasks!=null){
+                	boolean found = false;
+                	for(String fm : fileMasks){
+                		if(fm!=null && f.getName().matches(fm)){
+                			found=true;
+                			break;
+                		}
+                	}
+                	if(!found)
+                		continue;
+                	
+                }else if(fileMask!=null && !f.getName().matches(fileMask))
                     continue;
 
                 try {
-                    g.generate(f,relPath);
+                	if(f!=null && f.getName()!=null && relPath!=null){
+	                    g.generate(f,relPath);
+	                    generated=true;
+                	}
                 } catch (IOException e) {
                     throw new MojoExecutionException("Failed to generate a class from "+f,e);
                 }
@@ -114,6 +162,7 @@ public class GeneratorMojo extends AbstractMojo {
         }
 
         try {
+        	if(generated)
             g.build();
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to generate source files",e);

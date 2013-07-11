@@ -106,6 +106,17 @@ public class Generator {
             JDefinedClass c = cm._class(className);
             c.annotate(SuppressWarnings.class).paramArray("value").param("").param("PMD");
 
+            try{
+            if(className.matches(".*VER[0-9]+.*")){
+            	String classToExtend = className.split("VER")[0];
+            	if(!classToExtend.equals(className)){
+            		c._extends(cm._getClass(className.replaceAll("VER[0-9]+", "")));
+            	}
+             }
+            }catch(Exception e){
+
+            }
+            
             // [RESULT]
             // private static final ResourceBundleHolder holder = BundleHolder.get(Messages.class);
 
