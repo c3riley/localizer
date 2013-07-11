@@ -84,6 +84,10 @@ public class Generator {
     }
 
     public void generate(File propertyFile, String relPath) throws IOException {
+    	generate(propertyFile,relPath,true);
+    }
+    
+    public void generate(File propertyFile, String relPath, boolean useStatic) throws IOException {
         String className = toClassName(relPath);
 
         // up to date check
@@ -119,10 +123,9 @@ public class Generator {
             
             // [RESULT]
             // private static final ResourceBundleHolder holder = BundleHolder.get(Messages.class);
-
-            JVar holder = c.field(JMod.PRIVATE | JMod.STATIC | JMod.FINAL, ResourceBundleHolder.class, "holder",
-                    cm.ref(ResourceBundleHolder.class).staticInvoke("get").arg(c.dotclass()) );
-
+            JVar holder;
+	            holder = c.field(JMod.PRIVATE | JMod.STATIC | JMod.FINAL, ResourceBundleHolder.class, "holder",
+	                    cm.ref(ResourceBundleHolder.class).staticInvoke("get").arg(c.dotclass()) );
 
             for (Entry<Object,Object> e : props.entrySet()) {
                 String key = e.getKey().toString();
@@ -132,7 +135,12 @@ public class Generator {
 
                 // generate the default format method
                 List<JVar> args = new ArrayList<JVar>();
-                JMethod m = c.method(JMod.PUBLIC | JMod.STATIC, cm.ref(String.class), toJavaIdentifier(key));
+                JMethod m;
+                if(useStatic){
+                	m = c.method(JMod.PUBLIC | JMod.STATIC, cm.ref(String.class), toJavaIdentifier(key));
+                }else{
+                	m = c.method(JMod.PUBLIC, cm.ref(String.class), toJavaIdentifier(key));
+                }
                 for( int i=1; i<=n; i++ )
                     args.add(m.param(Object.class,"arg"+i));
 
@@ -145,7 +153,11 @@ public class Generator {
 
                 // generate localizable factory
                 args.clear();
-                m = c.method(JMod.PUBLIC | JMod.STATIC, cm.ref(Localizable.class), '_'+toJavaIdentifier(key));
+                if(useStatic){
+                	m = c.method(JMod.PUBLIC | JMod.STATIC, cm.ref(Localizable.class), '_'+toJavaIdentifier(key));
+                }else{
+                	m = c.method(JMod.PUBLIC, cm.ref(Localizable.class), '_'+toJavaIdentifier(key));
+                }
                 for( int i=1; i<=n; i++ )
                     args.add(m.param(Object.class,"arg"+i));
 

@@ -61,28 +61,36 @@ public class GeneratorMojo extends AbstractMojo {
 
     /**
      * Additional file name mask like "Messages.properties" to further
-     * restrict the resource processing.
+     * restrict the resource processing. 
      *
      * @parameter
      */
     protected String fileMask;
     
     /**
-     * Additional file name mask like "Messages.properties" to further
-     * restrict the resource processing.
+     * Additional file name masks like "Messages.properties" to further
+     * restrict the resource processing. Uses matches so regex allowed.
      *
      * @parameter
      */
     protected String[] fileMasks;
     
     /**
-     * Additional file name mask like "Messages.properties" to further
-     * restrict the resource processing.
+     * Additional path name mask like ".*localizer.*" to further
+     * restrict the resource processing. Uses matches so regex allowed.
      *
      * @parameter
      */
     protected String[] pathMasks;
 
+    /**
+     * The charset encoding of generated Java sources.
+     * Default to the platform specific encoding.
+     *
+     * @parameter default-value=true
+     */
+    protected Boolean useStatic;
+    
     /**
      * The charset encoding of generated Java sources.
      * Default to the platform specific encoding.
@@ -152,7 +160,7 @@ public class GeneratorMojo extends AbstractMojo {
 
                 try {
                 	if(f!=null && f.getName()!=null && relPath!=null){
-	                    g.generate(f,relPath);
+	                    g.generate(f,relPath,useStatic);
 	                    generated=true;
                 	}
                 } catch (IOException e) {
