@@ -51,6 +51,15 @@ public abstract class LocaleProvider {
         if(p==null) throw new IllegalArgumentException();
         theInstance = p;
     }
+    
+    public static void setProvider(final Locale locale) {
+    	if(locale==null) throw new IllegalArgumentException();
+    	setProvider(new LocaleProvider() {
+            public Locale get() {
+                return locale;
+            }
+        });
+    }
 
     /**
      * Gets the currently installed system-wide {@link LocaleProvider}.
@@ -76,6 +85,11 @@ public abstract class LocaleProvider {
             return Locale.getDefault();
         }
     };
+    
+   
 
     private static volatile LocaleProvider theInstance = DEFAULT;
+    
+    
+    
 }
