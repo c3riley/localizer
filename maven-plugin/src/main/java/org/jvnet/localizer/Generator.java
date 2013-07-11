@@ -118,7 +118,7 @@ public class Generator {
             	}
              }
             }catch(Exception e){
-
+            	reporter.debug("Issue with VER Logic - " + className + " - " + e.getMessage());
             }
             
             // [RESULT]

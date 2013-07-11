@@ -89,7 +89,7 @@ public class GeneratorMojo extends AbstractMojo {
      *
      * @parameter default-value=true
      */
-    protected Boolean useStatic;
+    protected boolean useStatic;
     
     /**
      * The charset encoding of generated Java sources.
